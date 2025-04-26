@@ -108,6 +108,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     let countdownTimer;
+    let currentClue = null;
 
     // Load saved clues from localStorage on page load
     document.addEventListener("DOMContentLoaded", () => {
@@ -140,6 +141,7 @@
         } else {
           clearInterval(countdownTimer);
           countdownElement.textContent = "";
+          saveCurrentClue();
           displayInfo(enteredNumber);
         }
       }, 1000);
@@ -158,23 +160,27 @@
         })
         .then(clues => {
           const clueText = clues[enteredNumber] || 'No clue available.';
-          const formattedClue = `Clue #${enteredNumber}: ${clueText}`;
+          currentClue = `Clue #${enteredNumber}: ${clueText}`;
 
           // Display the clue in the active clue box
-          infoContainer.innerHTML = `<p>${formattedClue}</p>`;
-
-          // Save the clue to localStorage and display it in the saved clues box
-          const savedClues = JSON.parse(localStorage.getItem("savedClues")) || [];
-          if (!savedClues.includes(formattedClue)) {
-            savedClues.push(formattedClue);
-            localStorage.setItem("savedClues", JSON.stringify(savedClues));
-            addSavedClueToDOM(formattedClue);
-          }
+          infoContainer.innerHTML = `<p>${currentClue}</p>`;
         })
         .catch(error => {
           console.error('Error fetching or parsing clues:', error);
           infoContainer.innerHTML = `<p style="color: red;">Error loading clue. Please try again.</p>`;
         });
+    }
+
+    function saveCurrentClue() {
+      if (currentClue) {
+        const savedClues = JSON.parse(localStorage.getItem("savedClues")) || [];
+        if (!savedClues.includes(currentClue)) {
+          savedClues.push(currentClue);
+          localStorage.setItem("savedClues", JSON.stringify(savedClues));
+          addSavedClueToDOM(currentClue);
+        }
+        currentClue = null; // Reset current clue after saving
+      }
     }
 
     function addSavedClueToDOM(clue) {
@@ -200,6 +206,7 @@
       savedCluesContainer.innerHTML = "";
       countdownElement.textContent = "";
       localStorage.removeItem("savedClues");
+      currentClue = null;
     }
   </script>
 
