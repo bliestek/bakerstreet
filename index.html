@@ -23,7 +23,7 @@
       font-weight: bold;
     }
 
-    #info-container {
+    #info-container, #saved-clues-container {
       margin-top: 20px;
       background-color: #34495e;
       padding: 15px;
@@ -84,6 +84,12 @@
         <button class="btn-reset" onclick="resetClues()">Reset</button>
       </div>
     </div>
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <h3>Saved Clues</h3>
+        <div id="saved-clues-container" class="mt-3"></div>
+      </div>
+    </div>
   </div>
 
   <!-- Add Bootstrap JS -->
@@ -92,17 +98,18 @@
     // Load saved clues from localStorage on page load
     document.addEventListener("DOMContentLoaded", () => {
       const savedClues = JSON.parse(localStorage.getItem("savedClues")) || [];
-      const infoContainer = document.getElementById("info-container");
+      const savedCluesContainer = document.getElementById("saved-clues-container");
       savedClues.forEach(clue => {
         const clueElement = document.createElement("p");
         clueElement.textContent = clue;
-        infoContainer.appendChild(clueElement);
+        savedCluesContainer.appendChild(clueElement);
       });
     });
 
     function displayInfo() {
       const enteredNumber = document.getElementById("numberInput").value.trim();
       const infoContainer = document.getElementById("info-container");
+      const savedCluesContainer = document.getElementById("saved-clues-container");
 
       if (!enteredNumber) {
         alert("Please enter a clue number.");
@@ -120,24 +127,30 @@
         .then(clues => {
           const clueText = clues[enteredNumber] || 'No clue available.';
           const formattedClue = `Clue #${enteredNumber}: ${clueText}`;
-          const clueElement = document.createElement("p");
-          clueElement.textContent = formattedClue;
 
-          // Append the clue to the container
-          infoContainer.appendChild(clueElement);
+          // Display the clue in the active clue box
+          infoContainer.innerHTML = `<p>${formattedClue}</p>`;
 
-          // Save the clue to localStorage
+          // Save the clue to localStorage and display it in the saved clues box
           const savedClues = JSON.parse(localStorage.getItem("savedClues")) || [];
-          savedClues.push(formattedClue);
-          localStorage.setItem("savedClues", JSON.stringify(savedClues));
+          if (!savedClues.includes(formattedClue)) {
+            savedClues.push(formattedClue);
+            localStorage.setItem("savedClues", JSON.stringify(savedClues));
+
+            const clueElement = document.createElement("p");
+            clueElement.textContent = formattedClue;
+            savedCluesContainer.appendChild(clueElement);
+          }
         })
         .catch(error => console.error('Error fetching or parsing clues:', error));
     }
 
     function resetClues() {
-      // Clear the info container and localStorage
+      // Clear the info container, saved clues container, and localStorage
       const infoContainer = document.getElementById("info-container");
+      const savedCluesContainer = document.getElementById("saved-clues-container");
       infoContainer.innerHTML = "";
+      savedCluesContainer.innerHTML = "";
       localStorage.removeItem("savedClues");
     }
   </script>
