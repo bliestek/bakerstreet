@@ -186,15 +186,33 @@
       const savedCluesContainer = document.getElementById("saved-clues-container");
       const clueElement = document.createElement("div");
       clueElement.className = "d-flex justify-content-between align-items-center";
-      clueElement.innerHTML = `<span>${clue}</span><button class="remove-btn" onclick="removeClue(this, '${clue}')">Remove</button>`;
+
+      // Use a safer approach to bind the remove button event
+      const clueTextElement = document.createElement("span");
+      clueTextElement.textContent = clue;
+
+      const removeButton = document.createElement("button");
+      removeButton.className = "remove-btn";
+      removeButton.textContent = "Remove";
+      removeButton.addEventListener("click", () => removeClue(clue));
+
+      clueElement.appendChild(clueTextElement);
+      clueElement.appendChild(removeButton);
       savedCluesContainer.appendChild(clueElement);
     }
 
-    function removeClue(button, clue) {
+    function removeClue(clue) {
       const savedClues = JSON.parse(localStorage.getItem("savedClues")) || [];
       const updatedClues = savedClues.filter(savedClue => savedClue !== clue);
       localStorage.setItem("savedClues", JSON.stringify(updatedClues));
-      button.parentElement.remove();
+
+      // Remove the clue from the DOM
+      const savedCluesContainer = document.getElementById("saved-clues-container");
+      Array.from(savedCluesContainer.children).forEach(child => {
+        if (child.firstChild.textContent === clue) {
+          savedCluesContainer.removeChild(child);
+        }
+      });
     }
 
     function resetClues() {
